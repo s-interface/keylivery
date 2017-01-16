@@ -16,26 +16,18 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-//        QRCodeGen.mainly();
-
-//        String codeText = "https://github.com/open-keychain/";
-        String codeText = "Ganz langer Text mit gaaaanz viel Buchstaben für ein gaaaanz großen QR Code mit gaaaaanz viel Informationen. abcdefghijklmnopqrstuvw";
-
-        QREncoder encoder = new QREncoder(codeText,250);
-        QRCanvas qrCanvas = new QRCanvas(encoder.encode());
-        qrCanvas.drawQR();
 
         Text text = new Text("Scan this!");
 
-//        Parent root = FXMLLoader.load(getClass().getResource("/fxml/sample.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/sample.fxml"));
 
-        BorderPane root = new BorderPane();
-        root.setCenter(qrCanvas);
-        root.setTop(text);
-        BorderPane.setAlignment(text, Pos.CENTER);
+//        BorderPane root = new BorderPane();
+//        root.setCenter(qrCanvas);
+//        root.setTop(text);
+//        BorderPane.setAlignment(text, Pos.CENTER);
 
         primaryStage.setTitle("QR Code");
-        primaryStage.setScene(new Scene(root, 275, 275));
+        primaryStage.setScene(new Scene(root, 275, 375));
         primaryStage.show();
     }
 

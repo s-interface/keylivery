@@ -7,16 +7,17 @@ import javafx.scene.paint.Color;
 
 public class QRCanvas extends Canvas{
 
-    BitMatrix byteMatrix;
+    BitMatrix bitMatrix;
 
-    public QRCanvas(double width, double height, BitMatrix byteMatrix) {
-        super(width, height);
-        this.byteMatrix = byteMatrix;
+    public QRCanvas() {
     }
 
-    public QRCanvas(BitMatrix byteMatrix) {
-        super(byteMatrix.getWidth(), byteMatrix.getHeight());
-        this.byteMatrix = byteMatrix;
+    public QRCanvas(double width, double height) {
+        super(width, height);
+    }
+
+    public void init(BitMatrix bitMatrix){
+        this.bitMatrix = bitMatrix;
     }
 
     public void drawQR(){
@@ -30,7 +31,7 @@ public class QRCanvas extends Canvas{
 
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                if (byteMatrix.get(i, j)) {
+                if (bitMatrix.get(i, j)) {
                     theContext.fillRect(i, j, 1, 1);
                 }
             }
