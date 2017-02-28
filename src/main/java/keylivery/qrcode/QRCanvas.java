@@ -7,7 +7,7 @@ import javafx.scene.paint.Color;
 
 public class QRCanvas extends Canvas{
 
-    BitMatrix bitMatrix;
+    private BitMatrix bitMatrix;
 
     public QRCanvas() {
     }
@@ -36,7 +36,12 @@ public class QRCanvas extends Canvas{
                 }
             }
         }
+    }
 
-
+    public void clear() {
+        double width = this.getWidth();
+        double height = this.getHeight();
+        GraphicsContext theContext = this.getGraphicsContext2D();
+        theContext.clearRect(0, 0, width, height);
     }
 }

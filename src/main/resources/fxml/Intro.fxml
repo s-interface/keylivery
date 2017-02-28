@@ -1,0 +1,26 @@
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.*?>
+<?import keylivery.qrcode.QRCanvas?>
+<GridPane xmlns:fx="http://javafx.com/fxml"
+          fx:controller="keylivery.Controller" alignment="center" hgap="10" vgap="10">
+    <padding>
+        <Insets top="5" right="5" bottom="5" left="5"/>
+    </padding>
+
+    <HBox spacing="4.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+        <children>
+            <Button text="Start Server" GridPane.columnIndex="0" GridPane.rowIndex="0" onAction="#buttonStartAction"/>
+            <Button text="Copy to Clipboard" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                    onAction="#buttonCopyClipboard"/>
+        </children>
+    </HBox>
+
+
+    <Label fx:id="lblInfo" text="Status Info" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+
+    <QRCanvas fx:id="actionCanvas" height="250" width="250" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+
+
+</GridPane>
