@@ -1,0 +1,3 @@
+[submodule "libs/SecureDataSocket"]
+	path = libs/SecureDataSocket
+	url = https://github.com/MrJabo/SecureDataSocket
