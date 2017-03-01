@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import keylivery.qrcode.QRCanvas?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+            minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111"
+            fx:controller="keylivery.StartMenuController">
+    <children>
+        <Button fx:id="selectKeyButton" layoutX="80.0" layoutY="62.0" mnemonicParsing="false"
+                onAction="#selectKeyButton" prefHeight="27.0" prefWidth="140.0" text="Select private key"/>
+        <Button fx:id="showQRCode" layoutX="80.0" layoutY="312.0" mnemonicParsing="false" onAction="#showQRCodeButton"
+                prefHeight="27.0" prefWidth="140.0" text="Show QR Code"/>
+        <Label fx:id="keyLabel" alignment="CENTER" layoutX="50.0" layoutY="192.0" prefHeight="17.0" prefWidth="200.0"
+               text="No key selected"/>
+        <Button fx:id="cancelQR" layoutX="550.0" layoutY="48.0" mnemonicParsing="false" onAction="#cancelQRCodeButton"
+                prefHeight="28.0" prefWidth="28.0" styleClass="cancel-button" stylesheets="@/css/cancel.css"
+                visible="false"/>
+        <Pane layoutX="300.0" layoutY="75.0" prefHeight="250.0" prefWidth="250.0" styleClass="canvas"
+              stylesheets="@/css/qrcanvas.css">
+            <children>
+                <QRCanvas fx:id="actionQRCanvas" height="250.0" width="250.0"/>
+            </children>
+        </Pane>
+        <Button fx:id="clipboardButton" layoutX="80.0" layoutY="359.0" mnemonicParsing="false"
+                onAction="#copyToClipboard" prefHeight="27.0" prefWidth="140.0" text="Copy to Clipboard"/>
+    </children>
+</AnchorPane>
