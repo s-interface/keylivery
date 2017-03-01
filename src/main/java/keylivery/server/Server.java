@@ -1,7 +1,7 @@
 package keylivery.server;
 
-import cryptolib.SecureDataSocket;
-import cryptolib.UnverifiedException;
+import com.cryptolib.SecureDataSocket;
+import com.cryptolib.UnverifiedException;
 
 import java.io.IOException;
 

@@ -11,6 +11,7 @@ buildscript {
 apply plugin: 'java'
 
 repositories {
+
     mavenLocal()
     mavenCentral()
 }
@@ -30,5 +31,25 @@ dependencies {
 
     compile group: 'com.google.zxing', name: 'core', version: '3.3.0'
 	compile group: 'com.google.zxing', name: 'javase', version: '3.3.0'
+	compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.56'
+    compile project(':libs:SecureDataSocket')
+
+}
+
+project(':libs:SecureDataSocket') {
+
+    apply plugin: 'java'
+
+    repositories {
+
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+
+        compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.56'
+
+    }
 
 }

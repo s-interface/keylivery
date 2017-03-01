@@ -24,8 +24,8 @@ public class Main extends Application {
 
         GnuPG gpg = new GnuPGProcessCaller();
         GnuPGKeyID[] keys = gpg.listKeys();
-        String keyBlock = gpg.exportKeyAsString(keys[0]);
-        System.out.println(keyBlock);
+//        String keyBlock = gpg.exportKeyAsString(keys[0]);
+//        System.out.println(keyBlock);
 
         for (GnuPGKeyID key : keys
                 ) {
@@ -37,7 +37,7 @@ public class Main extends Application {
 
         Text text = new Text("Scan this!");
 
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/intro.fxml"));
+        Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("fxml/intro.fxml"));
 
 //        BorderPane root = new BorderPane();
 //        root.setCenter(qrCanvas);
