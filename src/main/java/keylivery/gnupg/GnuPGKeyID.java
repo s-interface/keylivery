@@ -1,5 +1,6 @@
 package keylivery.gnupg;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class GnuPGKeyID {
@@ -24,5 +25,11 @@ public class GnuPGKeyID {
 
     public String getUserID() {
         return userID;
+    }
+
+    @Override
+    public String toString() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        return this.getUserID() + " | created: " + dateFormat.format(this.getCreationDate());
     }
 }

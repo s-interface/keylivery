@@ -24,7 +24,9 @@ jfx {
     mainClass = 'keylivery.Main'
 
     // minimal requirement for jfxNative-task
-    vendor = 'MyName'
+    vendor = 'KeyliveryApp'
+    
+    allPermissions = true
 }
 
 dependencies {

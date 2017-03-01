@@ -10,6 +10,7 @@ public class QRCanvas extends Canvas{
     private BitMatrix bitMatrix;
 
     public QRCanvas() {
+        super();
     }
 
     public QRCanvas(double width, double height) {
