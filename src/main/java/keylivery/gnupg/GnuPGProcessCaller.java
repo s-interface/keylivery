@@ -1,5 +1,7 @@
 package keylivery.gnupg;
 
+import keylivery.AppPreferences;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,8 +13,9 @@ public class GnuPGProcessCaller implements GnuPG {
 
     private final String gpgCommand;
 
-    public GnuPGProcessCaller(String gpgPath) {
-        gpgCommand = gpgPath;
+    public GnuPGProcessCaller() {
+        gpgCommand = AppPreferences.getInstance().getString(AppPreferences.Preference.GPGPATH_STR);
+
     }
 
     @Override

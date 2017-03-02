@@ -19,15 +19,15 @@ import keylivery.qrcode.QRCanvas;
 import keylivery.qrcode.QREncoder;
 import keylivery.server.ServerService;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 
 public class StartMenuController implements Initializable {
-
-    private final String propertiesFile = "keylivery.properties";
-    private String gpgPath = "/usr/local/bin/gpg";
 
     private GnuPGKeyID selectedKey;
     private Service<Void> serverThread;
@@ -47,10 +47,7 @@ public class StartMenuController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        setOptions();
-//        showAlert("gpg path: " + gpgPath);
-
-        gpg = new GnuPGProcessCaller(gpgPath);
+        gpg = new GnuPGProcessCaller();
     }
 
     public void selectKeyButton(ActionEvent actionEvent) {
@@ -144,7 +141,7 @@ public class StartMenuController implements Initializable {
         return keyBlock;
     }
 
-    public void showAlert(String content) {
+    private void showAlert(String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("test alert");
         alert.setHeaderText("Information Alert");
@@ -154,7 +151,13 @@ public class StartMenuController implements Initializable {
 
     public void cancelQRCodeButton(ActionEvent actionEvent) {
         if (serverThread.isRunning()) {
-            System.out.println("CANCEL serverThread:" + serverThread.cancel());
+            try {
+                System.out.println("CANCEL serverThread:" + serverThread.cancel());
+            } catch (NullPointerException e) {
+                ExceptionDialog exDiag = new ExceptionDialog(e);
+                exDiag.showAndWait();
+                e.printStackTrace();
+            }
         }
     }
 
@@ -164,21 +167,5 @@ public class StartMenuController implements Initializable {
         final ClipboardContent content = new ClipboardContent();
         content.putString(codeText);
         clipboard.setContent(content);
-    }
-
-    public void setOptions() {
-        Properties properties = new Properties();
-        try (InputStream inputStream = new FileInputStream(propertiesFile)) {
-            properties.load(inputStream);
-            gpgPath = properties.getProperty("gpg-path");
-        } catch (IOException e) {
-            System.err.println("Property File missing");
-        }
-        try (OutputStream outputStream = new FileOutputStream(propertiesFile)) {
-            properties.setProperty("gpg-path", gpgPath);
-            properties.store(outputStream, "Keylivery Properties File");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

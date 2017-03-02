@@ -32,7 +32,9 @@ public class Server {
         try {
             socket.setupServerWithClientCamera();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Warning: " + e.getMessage());
+//            new ExceptionDialog(e).showAndWait();
+//            e.printStackTrace();
         }
     }
 

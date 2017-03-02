@@ -2,6 +2,7 @@ package keylivery.server;
 
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import keylivery.AppPreferences;
 
 public class ServerService extends Service {
 
@@ -10,7 +11,8 @@ public class ServerService extends Service {
     private String connectionString;
 
     public ServerService(String keyBlockString) {
-        this.server = new Server(4711);
+        int portNum = AppPreferences.getInstance().getInt(AppPreferences.Preference.PORT_INT);
+        this.server = new Server(portNum);
         this.keyBlockString = keyBlockString;
         this.connectionString = server.create();
     }
@@ -39,12 +41,8 @@ public class ServerService extends Service {
     @Override
     public boolean cancel() {
         // need something like .isClosed() --> SecureDataSocket Lib
-        try {
-            if (true) {
-                server.stop();
-            }
-        } catch (NullPointerException e) {
-            System.out.println("ERROR: " + e.getMessage());
+        if (true) {
+            server.stop();
         }
         return super.cancel();
     }
