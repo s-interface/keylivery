@@ -19,15 +19,15 @@ import keylivery.qrcode.QRCanvas;
 import keylivery.qrcode.QREncoder;
 import keylivery.server.ServerService;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 
 public class StartMenuController implements Initializable {
+
+    private final String propertiesFile = "keylivery.properties";
+    private String gpgPath = "/usr/local/bin/gpg";
 
     private GnuPGKeyID selectedKey;
     private Service<Void> serverThread;
@@ -47,7 +47,10 @@ public class StartMenuController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        gpg = new GnuPGProcessCaller();
+        setOptions();
+//        showAlert("gpg path: " + gpgPath);
+
+        gpg = new GnuPGProcessCaller(gpgPath);
     }
 
     public void selectKeyButton(ActionEvent actionEvent) {
@@ -161,5 +164,21 @@ public class StartMenuController implements Initializable {
         final ClipboardContent content = new ClipboardContent();
         content.putString(codeText);
         clipboard.setContent(content);
+    }
+
+    public void setOptions() {
+        Properties properties = new Properties();
+        try (InputStream inputStream = new FileInputStream(propertiesFile)) {
+            properties.load(inputStream);
+            gpgPath = properties.getProperty("gpg-path");
+        } catch (IOException e) {
+            System.err.println("Property File missing");
+        }
+        try (OutputStream outputStream = new FileOutputStream(propertiesFile)) {
+            properties.setProperty("gpg-path", gpgPath);
+            properties.store(outputStream, "Keylivery Properties File");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

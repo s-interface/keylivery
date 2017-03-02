@@ -9,7 +9,11 @@ import java.util.stream.Collectors;
 
 public class GnuPGProcessCaller implements GnuPG {
 
-    private static final String gpgCommand = "/usr/local/bin/gpg";
+    private final String gpgCommand;
+
+    public GnuPGProcessCaller(String gpgPath) {
+        gpgCommand = gpgPath;
+    }
 
     @Override
     public GnuPGKeyID[] listKeys() throws IOException {
