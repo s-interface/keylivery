@@ -71,7 +71,7 @@ public class GnuPGProcessCaller implements GnuPG {
         } catch (NumberFormatException e) {
         }
         try {
-            resultDate = new SimpleDateFormat().parse(dateString);
+            resultDate = new SimpleDateFormat("yyyy-MM-dd").parse(dateString);
             return resultDate;
         } catch (ParseException e) {
         }
