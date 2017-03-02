@@ -5,6 +5,8 @@ import keylivery.AppPreferences;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -39,8 +41,7 @@ public class GnuPGProcessCaller implements GnuPG {
             switch (recordType) {
                 case "sec":
                     keyID = recordRow[4];
-                    long date = Long.valueOf(recordRow[5]);
-                    creationDate = new Date(date * 1000L);
+                    creationDate = parseDate(recordRow[5]);
                     break;
 
                 case "uid":
@@ -59,6 +60,22 @@ public class GnuPGProcessCaller implements GnuPG {
             }
         }
         return keys.toArray(new GnuPGKeyID[keys.size()]);
+    }
+
+    private Date parseDate(String dateString) {
+        Date resultDate;
+        try {
+            long dateL = Long.valueOf(dateString);
+            resultDate = new Date(dateL * 1000L);
+            return resultDate;
+        } catch (NumberFormatException e) {
+        }
+        try {
+            resultDate = new SimpleDateFormat().parse(dateString);
+            return resultDate;
+        } catch (ParseException e) {
+        }
+        throw new IllegalStateException("Reading Keys from gpg-process: Date Conversion failed");
     }
 
     @Override
