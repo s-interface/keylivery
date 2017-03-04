@@ -55,11 +55,17 @@ public class GnuPGProcessCaller implements GnuPG {
     }
 
     @Override
-    public void importKey(String gnuPGKeyString) {
-        GpGProcess gpGProcess = new GpGProcess("--import", "--dry-run").start();
+    public boolean importKey(String gnuPGKeyString) {
+        // use "--dry-run" for testing
+        GpGProcess gpGProcess = new GpGProcess("--import").start();
         gpGProcess.write(gnuPGKeyString);
         int exitValue = gpGProcess.waitFor();
-        System.out.println("ExitValue for: " + "\"--import\", \"--dry-run\"" + " was: " + exitValue);
+        if (exitValue == 0) {
+            return true;
+        } else if (exitValue == 2) {
+            System.out.println("Error (Import Key):\n" + gpGProcess.getErr().stream().collect(Collectors.joining("\n")));
+        }
+        return false;
     }
 
     @Override
@@ -92,6 +98,7 @@ public class GnuPGProcessCaller implements GnuPG {
     }
 
     private class GpGProcess {
+        private String name;
         private List<String> commands;
         private Process gpgProcess;
         private ThreadedStreamReader inReader;
@@ -101,22 +108,31 @@ public class GnuPGProcessCaller implements GnuPG {
             this.commands = new ArrayList<>();
             this.commands.add(gpgCommand);
             Collections.addAll(this.commands, args);
+            this.name = commands.stream().collect(Collectors.joining(" "));
         }
 
         GpGProcess start() {
             try {
                 gpgProcess = new ProcessBuilder(commands).start();
+                inReader = new ThreadedStreamReader(gpgProcess.getInputStream());
+                errReader = new ThreadedStreamReader(gpgProcess.getErrorStream());
+                inReader.start();
+                errReader.start();
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("Exception: " + e.getMessage() + "\tFull Command: \"" + name + "\":");
             }
-            inReader = new ThreadedStreamReader(gpgProcess.getInputStream());
-            errReader = new ThreadedStreamReader(gpgProcess.getErrorStream());
-            inReader.start();
-            errReader.start();
             return this;
         }
 
         void write(String outString) {
+            if (gpgProcess == null) {
+                try {
+                    throw new IOException("Could not write to gpgProcess: gpgProcess is null");
+                } catch (IOException e) {
+                    System.out.println("Exception: " + e.getMessage());
+                }
+                return;
+            }
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(gpgProcess.getOutputStream()));
             try {
                 out.write(outString);
@@ -129,7 +145,9 @@ public class GnuPGProcessCaller implements GnuPG {
 
         int waitFor() {
             try {
-                return gpgProcess.waitFor();
+                if (gpgProcess != null) {
+                    return gpgProcess.waitFor();
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -137,11 +155,17 @@ public class GnuPGProcessCaller implements GnuPG {
         }
 
         List<String> getInput() {
-            return inReader.getInput();
+            if (gpgProcess != null) {
+                return inReader.getInput();
+            }
+            return new ArrayList<>();
         }
 
-        public List<String> getErr() {
-            return errReader.getInput();
+        List<String> getErr() {
+            if (gpgProcess != null) {
+                return errReader.getInput();
+            }
+            return new ArrayList<>();
         }
     }
 

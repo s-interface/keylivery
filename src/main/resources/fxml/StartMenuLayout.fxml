@@ -23,7 +23,7 @@
                 <QRCanvas fx:id="actionQRCanvas" height="250.0" width="250.0"/>
             </children>
         </Pane>
-        <Button fx:id="clipboardButton" layoutX="80.0" layoutY="359.0" mnemonicParsing="false"
-                onAction="#copyToClipboard" prefHeight="27.0" prefWidth="140.0" text="Copy to Clipboard"/>
+        <Button fx:id="importKey" layoutX="80.0" layoutY="359.0" mnemonicParsing="false"
+                onAction="#importKey" prefHeight="27.0" prefWidth="140.0" text="Import Key Test"/>
     </children>
 </AnchorPane>

@@ -15,6 +15,7 @@ import javafx.scene.input.ClipboardContent;
 import keylivery.gnupg.GnuPG;
 import keylivery.gnupg.GnuPGKeyID;
 import keylivery.gnupg.GnuPGProcessCaller;
+import keylivery.gui.KeyblockInputDialog;
 import keylivery.qrcode.QRCanvas;
 import keylivery.qrcode.QREncoder;
 import keylivery.server.ServerService;
@@ -128,5 +129,21 @@ public class StartMenuController implements Initializable {
         final ClipboardContent content = new ClipboardContent();
         content.putString(codeText);
         clipboard.setContent(content);
+    }
+
+    public void importKey(ActionEvent actionEvent) {
+        KeyblockInputDialog keyInputDialog = new KeyblockInputDialog();
+        keyInputDialog.setTitle("Key Input Dialog");
+        keyInputDialog.setHeaderText("Look, a Key Input Dialog");
+        keyInputDialog.setContentText("Please enter keyblock");
+        keyInputDialog.getEditor().setPromptText("Enter Keyblock Here");
+
+        Optional<String> result = keyInputDialog.showAndWait();
+        if (result.isPresent()) {
+            if (gpg.importKey(result.get())) {
+                showAlert("Key Import: SUCCESS");
+            }
+        }
+
     }
 }
