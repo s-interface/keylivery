@@ -2,14 +2,16 @@ package keylivery.gnupg;
 
 import keylivery.AppPreferences;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class GnuPGProcessCaller implements GnuPG {
 
@@ -17,49 +19,60 @@ public class GnuPGProcessCaller implements GnuPG {
 
     public GnuPGProcessCaller() {
         gpgCommand = AppPreferences.getInstance().getString(AppPreferences.Preference.GPGPATH_STR);
-
     }
 
     @Override
-    public GnuPGKeyID[] listKeys() throws IOException {
-//        ToDO: Add exceptions and checks for null etc...
-        ArrayList<String[]> tempTable = new ArrayList<>();
-        Process gpgProcess = new ProcessBuilder(gpgCommand, "--armor", "--list-secret-key", "--with-colons").start();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(gpgProcess.getInputStream()));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            tempTable.add(line.split(":"));
-        }
-        String[][] keyListTable = tempTable.toArray(new String[tempTable.size()][]);
-
+    public GnuPGKeyID[] listKeys() {
+        GpGProcess gpGProcess = new GpGProcess("--armor", "--list-secret-key", "--with-colons").start();
+        gpGProcess.waitFor();
+        List<String> keyList = gpGProcess.getInput();
         ArrayList<GnuPGKeyID> keys = new ArrayList<>();
         Date creationDate = null;
         String keyID = null;
         String userID;
-        for (String[] recordRow : keyListTable) {
-            String recordType = recordRow[0];
+        for (String recordRow : keyList) {
+            String[] recordRowSplit = recordRow.split(":");
+            String recordType = recordRowSplit[0];
             switch (recordType) {
                 case "sec":
-                    keyID = recordRow[4];
-                    creationDate = parseDate(recordRow[5]);
+                    keyID = recordRowSplit[4];
+                    creationDate = parseDate(recordRowSplit[5]);
                     break;
-
                 case "uid":
                     if (keyID != null) {
-                        userID = recordRow[9];
+                        userID = recordRowSplit[9];
                         keys.add(new GnuPGKeyID(creationDate, keyID, userID));
                         keyID = null;
                     }
                     break;
-
                 case "ssb":
                     break;
-
                 default:
                     break;
             }
         }
         return keys.toArray(new GnuPGKeyID[keys.size()]);
+    }
+
+    @Override
+    public void importKey(String gnuPGKeyString) {
+        GpGProcess gpGProcess = new GpGProcess("--import", "--dry-run").start();
+        gpGProcess.write(gnuPGKeyString);
+        int exitValue = gpGProcess.waitFor();
+        System.out.println("ExitValue for: " + "\"--import\", \"--dry-run\"" + " was: " + exitValue);
+    }
+
+    @Override
+    public String exportKeyAsString(GnuPGKeyID gnuPGKeyID) {
+        return exportKeyAsString(gnuPGKeyID.getKeyID());
+    }
+
+    @Override
+    public String exportKeyAsString(String gnuPGKeyID) {
+        GpGProcess gpGProcess = new GpGProcess("--armor", "--export-secret-key", gnuPGKeyID).start();
+        gpGProcess.waitFor();
+        String result = gpGProcess.getInput().stream().collect(Collectors.joining("\n"));
+        return result;
     }
 
     private Date parseDate(String dateString) {
@@ -78,27 +91,85 @@ public class GnuPGProcessCaller implements GnuPG {
         throw new IllegalStateException("Reading Keys from gpg-process: Date Conversion failed");
     }
 
-    @Override
-    public void importKey(String gnuPGKeyString) {
-        System.out.println("WARNING: pgp key import not yet implemented!");
+    private class GpGProcess {
+        private List<String> commands;
+        private Process gpgProcess;
+        private ThreadedStreamReader inReader;
+        private ThreadedStreamReader errReader;
+
+        GpGProcess(String... args) {
+            this.commands = new ArrayList<>();
+            this.commands.add(gpgCommand);
+            Collections.addAll(this.commands, args);
+        }
+
+        GpGProcess start() {
+            try {
+                gpgProcess = new ProcessBuilder(commands).start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            inReader = new ThreadedStreamReader(gpgProcess.getInputStream());
+            errReader = new ThreadedStreamReader(gpgProcess.getErrorStream());
+            inReader.start();
+            errReader.start();
+            return this;
+        }
+
+        void write(String outString) {
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(gpgProcess.getOutputStream()));
+            try {
+                out.write(outString);
+                out.flush();
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        int waitFor() {
+            try {
+                return gpgProcess.waitFor();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return -1;
+        }
+
+        List<String> getInput() {
+            return inReader.getInput();
+        }
+
+        public List<String> getErr() {
+            return errReader.getInput();
+        }
     }
 
-    @Override
-    public String exportKeyAsString(GnuPGKeyID gnuPGKeyID) throws IOException {
-        String keyID = gnuPGKeyID.getKeyID();
-        String result;
-        Process gpgProcess = new ProcessBuilder(gpgCommand, "--armor", "--export-secret-key", keyID).start();
-        result = new BufferedReader(new InputStreamReader(gpgProcess.getInputStream()))
-                    .lines().collect(Collectors.joining("\n"));
-        return result;
-    }
+    private class ThreadedStreamReader extends Thread {
 
-    @Override
-    public String exportKeyAsString(String gnuPGKeyID) throws IOException {
-        String result;
-        Process gpgProcess = new ProcessBuilder(gpgCommand, "--armor", "--export-secret-key", gnuPGKeyID).start();
-        result = new BufferedReader(new InputStreamReader(gpgProcess.getInputStream()))
-                .lines().collect(Collectors.joining("\n"));
-        return result;
+        private InputStream inputStream;
+        private List<String> stringBuffer;
+
+        ThreadedStreamReader(InputStream inputStream) {
+            this.inputStream = inputStream;
+            this.stringBuffer = new ArrayList<>();
+        }
+
+        @Override
+        public void run() {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, UTF_8));
+            String line;
+            try {
+                while ((line = reader.readLine()) != null) {
+                    stringBuffer.add(line);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        List<String> getInput() {
+            return stringBuffer;
+        }
     }
 }

@@ -19,10 +19,7 @@ import keylivery.qrcode.QRCanvas;
 import keylivery.qrcode.QREncoder;
 import keylivery.server.ServerService;
 
-import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -51,27 +48,12 @@ public class StartMenuController implements Initializable {
     }
 
     public void selectKeyButton(ActionEvent actionEvent) {
-        GnuPGKeyID[] keys = new GnuPGKeyID[0];
-        try {
-            keys = gpg.listKeys();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        List<String> keyChoices = new ArrayList<>();
-        for (GnuPGKeyID key : keys
-                ) {
-            keyChoices.add(key.getCreationDate() + " / " + key.getUserID());
-            System.out.println(key.getCreationDate() + " / " + key.getUserID() + " / " + key.getKeyID());
-        }
-
+        GnuPGKeyID[] keys = gpg.listKeys();
         ChoiceDialog<GnuPGKeyID> dialog = new ChoiceDialog<>(null, keys);
         dialog.setTitle("Key Select Dialog");
         dialog.setHeaderText("Here you may choose your private key for export");
         dialog.setContentText("Select key:");
-
         Optional<GnuPGKeyID> result = dialog.showAndWait();
-
         if (result.isPresent()) {
             selectedKey = result.get();
             keyLabel.setText(selectedKey.getUserID());
@@ -79,7 +61,6 @@ public class StartMenuController implements Initializable {
     }
 
     public void showQRCodeButton(ActionEvent actionEvent) {
-        System.out.println("BUTTON PRESS");
         if (selectedKey == null) {
             showAlert("No Key selected!");
             return;
@@ -87,27 +68,19 @@ public class StartMenuController implements Initializable {
         showQRCode.setDisable(true);
         selectKeyButton.setDisable(true);
 
-        System.out.println("START pressed");
-
-        String keyString = getKeyString(selectedKey);
-
+        String keyString = gpg.exportKeyAsString(selectedKey);
         serverThread = new ServerService(keyString);
 
         codeText = ((ServerService) serverThread).getConnectionString();
-
         QREncoder encoder = new QREncoder(codeText, 250);
-
         actionQRCanvas.init(encoder.encode());
         actionQRCanvas.drawQR();
         cancelQR.setVisible(true);
-
 
         serverThread.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent event) {
                 System.out.println("SERVER DONE!");
-//                lblInfo.textProperty().unbind();
-//                lblInfo.setText("Success: Server Thread");
                 actionQRCanvas.clear();
                 showQRCode.setDisable(false);
                 selectKeyButton.setDisable(false);
@@ -126,19 +99,7 @@ public class StartMenuController implements Initializable {
             }
         });
 
-//        lblInfo.textProperty().bind(serverThread.messageProperty());
-
         serverThread.restart();
-    }
-
-    private String getKeyString(GnuPGKeyID selectedKey) {
-        String keyBlock = null;
-        try {
-            keyBlock = gpg.exportKeyAsString(selectedKey.getKeyID());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return keyBlock;
     }
 
     private void showAlert(String content) {

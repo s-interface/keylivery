@@ -11,7 +11,7 @@ public class AppPreferences {
     private static AppPreferences preferencesInstance;
 
     private final String propertiesFile = "keylivery.properties";
-    private final String _GPGPATH_STR = "/usr/local/bin/gpg";
+    private final String _GPGPATH_STR = "/usr/local/bin/gpg2";
     private final String _PORT_INT = "4711";
 
     private Properties properties;

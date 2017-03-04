@@ -1,14 +1,12 @@
 package keylivery.gnupg;
 
-import java.io.IOException;
-
 public interface GnuPG {
-    GnuPGKeyID[] listKeys() throws IOException;
+    GnuPGKeyID[] listKeys();
 
     void importKey(String gnuPGKeyString);
 
-    String exportKeyAsString(GnuPGKeyID gnuPGKeyID) throws IOException;
+    String exportKeyAsString(GnuPGKeyID gnuPGKeyID);
 
-    String exportKeyAsString(String gnuPGKeyID) throws IOException;
+    String exportKeyAsString(String gnuPGKeyID);
 
 }
