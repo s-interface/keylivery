@@ -1,20 +1,23 @@
 package keylivery.server;
 
+import com.cryptolib.SecureDataSocket;
+import com.cryptolib.SecureDataSocketException;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import keylivery.AppPreferences;
 
 public class ServerService extends Service {
 
-    private Server server;
     private String keyBlockString;
     private String connectionString;
+    private SecureDataSocket socket;
+    private int portNum;
 
     public ServerService(String keyBlockString) {
-        int portNum = AppPreferences.getInstance().getInt(AppPreferences.Preference.PORT_INT);
-        this.server = new Server(portNum);
         this.keyBlockString = keyBlockString;
-        this.connectionString = server.create();
+        this.portNum = AppPreferences.getInstance().getInt(AppPreferences.Preference.PORT_INT);
+        this.socket = new SecureDataSocket(portNum);
+        this.connectionString = createConnectionString();
     }
 
     public String getConnectionString() {
@@ -26,12 +29,18 @@ public class ServerService extends Service {
         return new Task<Void>() {
             @Override
             protected Void call() throws Exception {
-
+                System.out.println("SERVER: RUNNING");
                 updateMessage("Running: Server Thread");
 
-                server.start();
-                server.sendString(keyBlockString);
-                server.stop();
+                try {
+                    socket.setupServerWithClientCamera();
+                    socket.write(keyBlockString.getBytes());
+                    socket.close();
+                } catch (SecureDataSocketException e) {
+                    if (!e.getMessage().contains("Socket closed")) {
+                        e.printStackTrace();
+                    }
+                }
 
                 return null;
             }
@@ -42,8 +51,20 @@ public class ServerService extends Service {
     public boolean cancel() {
         // need something like .isClosed() --> SecureDataSocket Lib
         if (true) {
-            server.stop();
+            socket.close();
+            System.out.println("SERVER: Socket closed");
         }
         return super.cancel();
+    }
+
+    private String createConnectionString() {
+        try {
+            connectionString = socket.prepareServerWithClientCamera();
+            System.out.println("New Server: " + connectionString);
+        } catch (SecureDataSocketException e) {
+            e.printStackTrace();
+        }
+        return connectionString;
+
     }
 }

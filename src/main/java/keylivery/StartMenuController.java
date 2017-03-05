@@ -81,7 +81,7 @@ public class StartMenuController implements Initializable {
         serverThread.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent event) {
-                System.out.println("SERVER DONE!");
+                System.out.println("SERVER: DONE!");
                 actionQRCanvas.clear();
                 showQRCode.setDisable(false);
                 selectKeyButton.setDisable(false);
@@ -92,7 +92,6 @@ public class StartMenuController implements Initializable {
         serverThread.setOnCancelled(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent event) {
-                System.out.println("SERVER WAS CANCELED!");
                 actionQRCanvas.clear();
                 showQRCode.setDisable(false);
                 selectKeyButton.setDisable(false);
@@ -113,13 +112,8 @@ public class StartMenuController implements Initializable {
 
     public void cancelQRCodeButton(ActionEvent actionEvent) {
         if (serverThread.isRunning()) {
-            try {
-                System.out.println("CANCEL serverThread:" + serverThread.cancel());
-            } catch (NullPointerException e) {
-                ExceptionDialog exDiag = new ExceptionDialog(e);
-                exDiag.showAndWait();
-                e.printStackTrace();
-            }
+            //close server socket
+            serverThread.cancel();
         }
     }
 
@@ -144,6 +138,5 @@ public class StartMenuController implements Initializable {
                 showAlert("Key Import: SUCCESS");
             }
         }
-
     }
 }
