@@ -10,7 +10,7 @@ import keylivery.gui.ConformationDialogCallable;
 
 import java.util.concurrent.FutureTask;
 
-public class ServerNoCodeService extends Service {
+public class ServerNoCodeService extends Service<String> {
 
     private String keyBlockString;
     private String connectionString;

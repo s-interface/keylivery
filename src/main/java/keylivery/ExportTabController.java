@@ -1,5 +1,6 @@
 package keylivery;
 
+import javafx.concurrent.Service;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -10,6 +11,7 @@ import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.text.Text;
 import keylivery.gnupg.GnuPG;
 import keylivery.gnupg.GnuPGKeyID;
 import keylivery.gnupg.GnuPGProcessCaller;
@@ -27,10 +29,12 @@ import java.util.ResourceBundle;
 public class ExportTabController implements Initializable {
 
     private GnuPGKeyID selectedKey;
-    private ServerService serverThread;
+    private Service<String> serverThread;
     private String codeText = "";
     private GnuPG gpg;
 
+    @FXML
+    private Text infoText;
     @FXML
     private Button exportWithoutQRCodeButton;
     @FXML
@@ -126,31 +130,39 @@ public class ExportTabController implements Initializable {
         exportWithoutQRCodeButton.setDisable(true);
         showQRCode.setDisable(true);
         selectKeyButton.setDisable(true);
+        cancelQR.setVisible(true);
 
         String keyString = gpg.exportKeyAsString(selectedKey);
-        ServerNoCodeService serverNoCode = new ServerNoCodeService(keyString);
-        System.out.println(serverNoCode.getIpAddress());
-        System.out.println(serverNoCode.getPortNum());
+        serverThread = new ServerNoCodeService(keyString);
+        String ipAddress = ((ServerNoCodeService) serverThread).getIpAddress();
+        int portNumber = ((ServerNoCodeService) serverThread).getPortNum();
+        System.out.println(ipAddress);
+        System.out.println(portNumber);
+        infoText.setText("IP:\t" + ipAddress + "\n" + "Port:\t" + portNumber);
 
-        serverNoCode.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+        serverThread.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent event) {
                 System.out.println("SERVER: DONE!");
                 showQRCode.setDisable(false);
                 selectKeyButton.setDisable(false);
                 exportWithoutQRCodeButton.setDisable(false);
+                cancelQR.setVisible(false);
+                infoText.setText("");
             }
         });
 
-        serverNoCode.setOnCancelled(new EventHandler<WorkerStateEvent>() {
+        serverThread.setOnCancelled(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent event) {
                 showQRCode.setDisable(false);
                 selectKeyButton.setDisable(false);
                 exportWithoutQRCodeButton.setDisable(false);
+                cancelQR.setVisible(false);
+                infoText.setText("");
             }
         });
 
-        serverNoCode.restart();
+        serverThread.restart();
     }
 }

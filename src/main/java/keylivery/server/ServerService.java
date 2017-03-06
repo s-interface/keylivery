@@ -6,7 +6,7 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import keylivery.AppPreferences;
 
-public class ServerService extends Service {
+public class ServerService extends Service<String> {
 
     private String keyBlockString;
     private String connectionString;
