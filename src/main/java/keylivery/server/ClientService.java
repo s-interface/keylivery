@@ -1,16 +1,13 @@
 package keylivery.server;
 
 import com.cryptolib.SecureDataSocket;
-import com.cryptolib.SecureDataSocketException;
+import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import keylivery.AppPreferences;
+import keylivery.gui.ConformationDialogCallable;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Optional;
+import java.util.concurrent.FutureTask;
 
 public class ClientService extends Service {
 
@@ -35,10 +32,16 @@ public class ClientService extends Service {
                 System.out.println("Client: RUNNING");
                 secret = socket.setupClientNoCamera(connectionDetails);
                 System.out.println("secret: " + secret);
-                // only for testing
-                socket.comparedPhrases(true);
-                byte[] test = socket.read();
-                keyBlockString = new String(test, "UTF-8");
+
+                FutureTask<Boolean> conformation = new FutureTask<>(new ConformationDialogCallable(secret));
+                Platform.runLater(conformation);
+                boolean comparisonResult = conformation.get();
+
+                socket.comparedPhrases(comparisonResult);
+                if (comparisonResult) {
+                    byte[] test = socket.read();
+                    keyBlockString = new String(test, "UTF-8");
+                }
                 socket.close();
 
                 return null;
@@ -48,36 +51,5 @@ public class ClientService extends Service {
 
     public String getKeyBlockString() {
         return keyBlockString;
-    }
-
-    // run only from JAVAFX thread!
-    public void runClient() {
-        System.out.println("Client: RUNNING");
-        try {
-            secret = socket.setupClientNoCamera(connectionDetails);
-            System.out.println("secret: " + secret);
-
-            // Alert Box for sentence conformation
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Confirmation Dialog");
-            alert.setHeaderText(secret);
-            alert.setContentText("Are they identical?");
-            ButtonType buttonTypeIdentical = new ButtonType("Identical");
-            ButtonType buttonTypeCancel = new ButtonType("Not Identical", ButtonBar.ButtonData.CANCEL_CLOSE);
-            alert.getButtonTypes().setAll(buttonTypeIdentical, buttonTypeCancel);
-
-            boolean comparisonResult;
-            Optional<ButtonType> result = alert.showAndWait();
-            comparisonResult = result.get() == buttonTypeIdentical;
-
-            socket.comparedPhrases(comparisonResult);
-            if (comparisonResult) {
-                byte[] test = socket.read();
-                keyBlockString = new String(test, "UTF-8");
-            }
-            socket.close();
-        } catch (SecureDataSocketException | UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
     }
 }

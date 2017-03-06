@@ -1,6 +1,5 @@
 package keylivery;
 
-import javafx.concurrent.Service;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -17,6 +16,7 @@ import keylivery.gnupg.GnuPGProcessCaller;
 import keylivery.gui.GuiHelper;
 import keylivery.qrcode.QRCanvas;
 import keylivery.qrcode.QREncoder;
+import keylivery.server.ServerNoCodeService;
 import keylivery.server.ServerService;
 
 import java.net.URL;
@@ -27,10 +27,12 @@ import java.util.ResourceBundle;
 public class ExportTabController implements Initializable {
 
     private GnuPGKeyID selectedKey;
-    private Service<Void> serverThread;
+    private ServerService serverThread;
     private String codeText = "";
     private GnuPG gpg;
 
+    @FXML
+    private Button exportWithoutQRCodeButton;
     @FXML
     private Label keyLabel;
     @FXML
@@ -117,6 +119,38 @@ public class ExportTabController implements Initializable {
     }
 
     public void exportWithoutQRCode(ActionEvent actionEvent) {
-        GuiHelper.showAlert("not yet implemented");
+        if (selectedKey == null) {
+            GuiHelper.showAlert("No Key selected!");
+            return;
+        }
+        exportWithoutQRCodeButton.setDisable(true);
+        showQRCode.setDisable(true);
+        selectKeyButton.setDisable(true);
+
+        String keyString = gpg.exportKeyAsString(selectedKey);
+        ServerNoCodeService serverNoCode = new ServerNoCodeService(keyString);
+        System.out.println(serverNoCode.getIpAddress());
+        System.out.println(serverNoCode.getPortNum());
+
+        serverNoCode.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+                System.out.println("SERVER: DONE!");
+                showQRCode.setDisable(false);
+                selectKeyButton.setDisable(false);
+                exportWithoutQRCodeButton.setDisable(false);
+            }
+        });
+
+        serverNoCode.setOnCancelled(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+                showQRCode.setDisable(false);
+                selectKeyButton.setDisable(false);
+                exportWithoutQRCodeButton.setDisable(false);
+            }
+        });
+
+        serverNoCode.restart();
     }
 }

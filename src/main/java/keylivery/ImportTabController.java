@@ -1,7 +1,9 @@
 package keylivery;
 
 import javafx.application.Platform;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -41,22 +43,15 @@ public class ImportTabController implements Initializable {
             startClientButton.setDisable(true);
             ClientService clientService = new ClientService(ipPortPair.getKey() + ":" + ipPortPair.getValue());
 
-            // This solution will freeze the gui!
-            clientService.runClient();
-            keyBlockTextArea.setText(clientService.getKeyBlockString());
-            startClientButton.setDisable(false);
-
-
-            // for later correct implementation:
-//            clientService.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-//                @Override
-//                public void handle(WorkerStateEvent event) {
-//                    System.out.println("Client Service success");
-//                    keyBlockTextArea.setText(clientService.getKeyBlockString());
-//                    startClientButton.setDisable(false);
-//                }
-//            });
-//            clientService.restart();
+            clientService.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+                @Override
+                public void handle(WorkerStateEvent event) {
+                    System.out.println("Client Service success");
+                    keyBlockTextArea.setText(clientService.getKeyBlockString());
+                    startClientButton.setDisable(false);
+                }
+            });
+            clientService.restart();
         });
 
 
@@ -69,7 +64,7 @@ public class ImportTabController implements Initializable {
         }
     }
 
-    private Dialog getIPAndPortDialog() {
+    private Dialog<Pair<String, String>> getIPAndPortDialog() {
         // http://code.makery.ch/blog/javafx-dialogs-official/
         // Create the custom dialog.
         Dialog<Pair<String, String>> dialog = new Dialog<>();
