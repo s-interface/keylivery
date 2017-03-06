@@ -6,7 +6,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
@@ -15,7 +14,7 @@ import javafx.scene.input.ClipboardContent;
 import keylivery.gnupg.GnuPG;
 import keylivery.gnupg.GnuPGKeyID;
 import keylivery.gnupg.GnuPGProcessCaller;
-import keylivery.gui.KeyblockInputDialog;
+import keylivery.gui.GuiHelper;
 import keylivery.qrcode.QRCanvas;
 import keylivery.qrcode.QREncoder;
 import keylivery.server.ServerService;
@@ -25,7 +24,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 
-public class StartMenuController implements Initializable {
+public class ExportTabController implements Initializable {
 
     private GnuPGKeyID selectedKey;
     private Service<Void> serverThread;
@@ -63,7 +62,7 @@ public class StartMenuController implements Initializable {
 
     public void showQRCodeButton(ActionEvent actionEvent) {
         if (selectedKey == null) {
-            showAlert("No Key selected!");
+            GuiHelper.showAlert("No Key selected!");
             return;
         }
         showQRCode.setDisable(true);
@@ -102,14 +101,6 @@ public class StartMenuController implements Initializable {
         serverThread.restart();
     }
 
-    private void showAlert(String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("test alert");
-        alert.setHeaderText("Information Alert");
-        alert.setContentText(content);
-        alert.show();
-    }
-
     public void cancelQRCodeButton(ActionEvent actionEvent) {
         if (serverThread.isRunning()) {
             //close server socket
@@ -125,18 +116,7 @@ public class StartMenuController implements Initializable {
         clipboard.setContent(content);
     }
 
-    public void importKey(ActionEvent actionEvent) {
-        KeyblockInputDialog keyInputDialog = new KeyblockInputDialog();
-        keyInputDialog.setTitle("Key Input Dialog");
-        keyInputDialog.setHeaderText("Look, a Key Input Dialog");
-        keyInputDialog.setContentText("Please enter keyblock");
-        keyInputDialog.getEditor().setPromptText("Enter Keyblock Here");
-
-        Optional<String> result = keyInputDialog.showAndWait();
-        if (result.isPresent()) {
-            if (gpg.importKey(result.get())) {
-                showAlert("Key Import: SUCCESS");
-            }
-        }
+    public void exportWithoutQRCode(ActionEvent actionEvent) {
+        GuiHelper.showAlert("not yet implemented");
     }
 }

@@ -6,7 +6,7 @@ import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +23,8 @@ public class GnuPGProcessCaller implements GnuPG {
 
     @Override
     public GnuPGKeyID[] listKeys() {
-        GpGProcess gpGProcess = new GpGProcess("--armor", "--list-secret-key", "--with-colons").start();
+        List<String> args = Arrays.asList("--armor", "--list-secret-key", "--with-colons");
+        GpGProcess gpGProcess = new GpGProcess(args).start();
         gpGProcess.waitFor();
         List<String> keyList = gpGProcess.getInput();
         ArrayList<GnuPGKeyID> keys = new ArrayList<>();
@@ -55,9 +56,13 @@ public class GnuPGProcessCaller implements GnuPG {
     }
 
     @Override
-    public boolean importKey(String gnuPGKeyString) {
-        // use "--dry-run" for testing
-        GpGProcess gpGProcess = new GpGProcess("--import").start();
+    public boolean importKey(String gnuPGKeyString, boolean dryRun) {
+        List<String> args = new ArrayList<>();
+        args.add("--import");
+        if (dryRun) {
+            args.add("--dry-run");
+        }
+        GpGProcess gpGProcess = new GpGProcess(args).start();
         gpGProcess.write(gnuPGKeyString);
         int exitValue = gpGProcess.waitFor();
         if (exitValue == 0) {
@@ -75,7 +80,8 @@ public class GnuPGProcessCaller implements GnuPG {
 
     @Override
     public String exportKeyAsString(String gnuPGKeyID) {
-        GpGProcess gpGProcess = new GpGProcess("--armor", "--export-secret-key", gnuPGKeyID).start();
+        List<String> args = Arrays.asList("--armor", "--export-secret-key", gnuPGKeyID);
+        GpGProcess gpGProcess = new GpGProcess(args).start();
         gpGProcess.waitFor();
         String result = gpGProcess.getInput().stream().collect(Collectors.joining("\n"));
         return result;
@@ -104,10 +110,10 @@ public class GnuPGProcessCaller implements GnuPG {
         private ThreadedStreamReader inReader;
         private ThreadedStreamReader errReader;
 
-        GpGProcess(String... args) {
+        GpGProcess(List<String> args) {
             this.commands = new ArrayList<>();
             this.commands.add(gpgCommand);
-            Collections.addAll(this.commands, args);
+            this.commands.addAll(args);
             this.name = commands.stream().collect(Collectors.joining(" "));
         }
 
