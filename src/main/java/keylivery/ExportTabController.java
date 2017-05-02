@@ -18,7 +18,6 @@ import keylivery.gnupg.GnuPGProcessCaller;
 import keylivery.gui.GuiHelper;
 import keylivery.qrcode.QRCanvas;
 import keylivery.qrcode.QREncoder;
-import keylivery.server.ServerNoCodeService;
 import keylivery.server.ServerService;
 
 import java.net.URL;
@@ -35,8 +34,6 @@ public class ExportTabController implements Initializable {
 
     @FXML
     private Text infoText;
-    @FXML
-    private Button exportWithoutQRCodeButton;
     @FXML
     private Label keyLabel;
     @FXML
@@ -120,49 +117,5 @@ public class ExportTabController implements Initializable {
         final ClipboardContent content = new ClipboardContent();
         content.putString(codeText);
         clipboard.setContent(content);
-    }
-
-    public void exportWithoutQRCode(ActionEvent actionEvent) {
-        if (selectedKey == null) {
-            GuiHelper.showAlert("No Key selected!");
-            return;
-        }
-        exportWithoutQRCodeButton.setDisable(true);
-        showQRCode.setDisable(true);
-        selectKeyButton.setDisable(true);
-        cancelQR.setVisible(true);
-
-        String keyString = gpg.exportKeyAsString(selectedKey);
-        serverThread = new ServerNoCodeService(keyString);
-        String ipAddress = ((ServerNoCodeService) serverThread).getIpAddress();
-        int portNumber = ((ServerNoCodeService) serverThread).getPortNum();
-        System.out.println(ipAddress);
-        System.out.println(portNumber);
-        infoText.setText("IP:\t" + ipAddress + "\n" + "Port:\t" + portNumber);
-
-        serverThread.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(WorkerStateEvent event) {
-                System.out.println("SERVER: DONE!");
-                showQRCode.setDisable(false);
-                selectKeyButton.setDisable(false);
-                exportWithoutQRCodeButton.setDisable(false);
-                cancelQR.setVisible(false);
-                infoText.setText("");
-            }
-        });
-
-        serverThread.setOnCancelled(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(WorkerStateEvent event) {
-                showQRCode.setDisable(false);
-                selectKeyButton.setDisable(false);
-                exportWithoutQRCodeButton.setDisable(false);
-                cancelQR.setVisible(false);
-                infoText.setText("");
-            }
-        });
-
-        serverThread.restart();
     }
 }

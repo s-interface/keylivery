@@ -1,9 +1,7 @@
 package keylivery;
 
 import javafx.application.Platform;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -14,18 +12,16 @@ import javafx.util.Pair;
 import keylivery.gnupg.GnuPG;
 import keylivery.gnupg.GnuPGProcessCaller;
 import keylivery.gui.GuiHelper;
-import keylivery.server.ClientService;
 
 import java.net.URL;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class ImportTabController implements Initializable {
 
-    public Button importKeyButton;
-    public TextArea keyBlockTextArea;
     @FXML
-    private Button startClientButton;
+    private Button importKeyButton;
+    @FXML
+    private TextArea keyBlockTextArea;
     @FXML
     private CheckBox dryRunCheckBox;
     private GnuPG gpg;
@@ -34,27 +30,6 @@ public class ImportTabController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         gpg = new GnuPGProcessCaller();
         importKeyButton.disableProperty().bind(keyBlockTextArea.textProperty().isEmpty());
-    }
-
-    public void startClient(ActionEvent actionEvent) {
-        Optional<Pair<String, String>> result = getIPAndPortDialog().showAndWait();
-
-        result.ifPresent(ipPortPair -> {
-            startClientButton.setDisable(true);
-            ClientService clientService = new ClientService(ipPortPair.getKey() + ":" + ipPortPair.getValue());
-
-            clientService.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-                @Override
-                public void handle(WorkerStateEvent event) {
-                    System.out.println("Client Service success");
-                    keyBlockTextArea.setText(clientService.getKeyBlockString());
-                    startClientButton.setDisable(false);
-                }
-            });
-            clientService.restart();
-        });
-
-
     }
 
     public void importKey(ActionEvent actionEvent) {
@@ -93,11 +68,9 @@ public class ImportTabController implements Initializable {
         grid.add(new Label("Port Number:"), 0, 1);
         grid.add(portNumber, 1, 1);
 
-        // Enable/Disable login button depending on whether a username was entered.
         Node loginButton = dialog.getDialogPane().lookupButton(enterDataButtonType);
         loginButton.setDisable(true);
 
-        // Do some validation (using the Java 8 lambda syntax).
         ipAddress.textProperty().addListener((observable, oldValue, newValue) -> {
             loginButton.setDisable(newValue.trim().isEmpty());
         });

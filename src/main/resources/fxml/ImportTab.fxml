@@ -8,10 +8,8 @@
             minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111"
             fx:controller="keylivery.ImportTabController">
     <children>
-        <Button fx:id="startClientButton" layoutX="221.0" layoutY="40.0" mnemonicParsing="false" onAction="#startClient"
-                text="Receive Key over Wlan"/>
         <TextArea fx:id="keyBlockTextArea" layoutX="80.0" layoutY="100.0" prefHeight="200.0" prefWidth="440.0"
-                  promptText="Receive Keyblock over Wlan or paste it here."/>
+                  promptText="Paste Keyblock here."/>
         <Button fx:id="importKeyButton" layoutX="205.0" layoutY="310.0" mnemonicParsing="false" onAction="#importKey"
                 text="Import Keyblock into GnuPG"/>
         <CheckBox fx:id="dryRunCheckBox" layoutX="420.0" layoutY="315.0" mnemonicParsing="false" selected="true"

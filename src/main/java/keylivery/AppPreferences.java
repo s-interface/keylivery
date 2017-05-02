@@ -17,8 +17,9 @@ public class AppPreferences {
     private Properties properties;
 
     private AppPreferences() {
+        String gpgPath = getGpgPath();
         this.properties = new Properties();
-        properties.setProperty(GPGPATH_STR.name(), properties.getProperty(GPGPATH_STR.name(), _GPGPATH_STR));
+        properties.setProperty(GPGPATH_STR.name(), properties.getProperty(GPGPATH_STR.name(), gpgPath));
         properties.setProperty(PORT_INT.name(), properties.getProperty(PORT_INT.name(), _PORT_INT));
         init();
     }
@@ -28,6 +29,29 @@ public class AppPreferences {
             preferencesInstance = new AppPreferences();
         }
         return preferencesInstance;
+    }
+
+    //Trying to locate gpg2
+    private String getGpgPath() {
+        String result = "";
+        try {
+            Process locateGpgProcess = new ProcessBuilder("which", "gpg2").start();
+            BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(locateGpgProcess.getInputStream()));
+            StringBuilder builder = new StringBuilder();
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line);
+                builder.append(System.getProperty("line.separator"));
+            }
+            result = builder.toString().trim();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (result.contains("gpg2")) {
+            return result;
+        }
+        return _GPGPATH_STR;
     }
 
     private void init() {
