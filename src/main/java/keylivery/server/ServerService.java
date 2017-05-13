@@ -29,8 +29,9 @@ public class ServerService extends Service<String> {
         return new Task<Void>() {
             @Override
             protected Void call() throws Exception {
-                System.out.println("SERVER: RUNNING");
-                updateMessage("Running: Server Thread");
+                // debug output:
+                // System.out.println("SERVER: RUNNING");
+                // updateMessage("Running: Server Thread");
 
                 try {
                     socket.setupServerWithClientCamera();
@@ -49,7 +50,7 @@ public class ServerService extends Service<String> {
 
     @Override
     public boolean cancel() {
-        // need something like .isClosed() --> SecureDataSocket Lib
+        // maybe need something like .isClosed() --> SecureDataSocket Lib
         if (true) {
             socket.close();
             System.out.println("SERVER: Socket closed");
@@ -60,7 +61,9 @@ public class ServerService extends Service<String> {
     private String createConnectionString() {
         try {
             connectionString = socket.prepareServerWithClientCamera();
-            System.out.println("New Server: " + connectionString);
+            // debug console out:
+            String ipNum = connectionString.split(":",2)[0];
+            System.out.println("Prepare Server at: " + ipNum + ":" +portNum);
         } catch (SecureDataSocketException e) {
             e.printStackTrace();
         }

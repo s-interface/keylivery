@@ -7,29 +7,21 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 <?import keylivery.qrcode.QRCanvas?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-            minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111"
-            fx:controller="keylivery.ExportTabController">
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="keylivery.ExportTabController">
     <children>
-        <Button fx:id="selectKeyButton" layoutX="80.0" layoutY="75.0" mnemonicParsing="false"
-                onAction="#selectKeyButton" prefHeight="27.0" prefWidth="140.0" text="Select private key"/>
-        <Button fx:id="showQRCode" layoutX="80.0" layoutY="298.0" mnemonicParsing="false" onAction="#showQRCodeButton"
-                prefHeight="27.0" prefWidth="140.0" text="Show QR Code"/>
-        <Label fx:id="keyLabel" alignment="CENTER" layoutX="50.0" layoutY="192.0" prefHeight="17.0" prefWidth="200.0"
-               text="No key selected"/>
-        <Button fx:id="cancelQR" layoutX="550.0" layoutY="48.0" mnemonicParsing="false" onAction="#cancelQRCodeButton"
-                prefHeight="28.0" prefWidth="28.0" styleClass="cancel-button" stylesheets="@/css/cancel.css"
-                visible="false"/>
-        <Pane layoutX="300.0" layoutY="75.0" prefHeight="250.0" prefWidth="250.0" styleClass="canvas"
-              stylesheets="@/css/qrcanvas.css">
+        <Button fx:id="selectKeyButton" layoutX="230.0" layoutY="310.0" mnemonicParsing="false" onAction="#selectKeyButton" prefHeight="27.0" prefWidth="140.0" text="Select private key" />
+        <Label fx:id="keyLabel" alignment="CENTER" layoutX="100.0" layoutY="345.0" prefHeight="17.0" prefWidth="400.0" text="No key selected" />
+        <Pane layoutX="175.0" layoutY="35.0" prefHeight="250.0" prefWidth="250.0" styleClass="canvas" stylesheets="@/css/qrcanvas.css">
             <children>
-                <QRCanvas fx:id="actionQRCanvas" height="250.0" width="250.0"/>
+                <QRCanvas fx:id="actionQRCanvas" height="250.0" width="250.0" />
                 <Text fx:id="infoText" layoutX="35.0" layoutY="121.0" strokeType="OUTSIDE" strokeWidth="0.0" text="">
                     <font>
-                        <Font size="18.0"/>
+                        <Font size="18.0" />
                     </font>
                 </Text>
             </children>
         </Pane>
+        <Button fx:id="cancelQR" layoutX="420.0" layoutY="15.0" mnemonicParsing="false" onAction="#cancelQRCodeButton" prefHeight="28.0" prefWidth="28.0" styleClass="cancel-button" stylesheets="@/css/cancel.css" visible="false" />
     </children>
 </AnchorPane>

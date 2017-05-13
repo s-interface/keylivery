@@ -37,8 +37,6 @@ public class ExportTabController implements Initializable {
     @FXML
     private Label keyLabel;
     @FXML
-    private Button showQRCode;
-    @FXML
     private Button selectKeyButton;
     @FXML
     private Button cancelQR;
@@ -60,15 +58,15 @@ public class ExportTabController implements Initializable {
         if (result.isPresent()) {
             selectedKey = result.get();
             keyLabel.setText(selectedKey.getUserID());
+            showQRCode();
         }
     }
 
-    public void showQRCodeButton(ActionEvent actionEvent) {
+    public void showQRCode() {
         if (selectedKey == null) {
             GuiHelper.showAlert("No Key selected!");
             return;
         }
-        showQRCode.setDisable(true);
         selectKeyButton.setDisable(true);
 
         String keyString = gpg.exportKeyAsString(selectedKey);
@@ -85,7 +83,6 @@ public class ExportTabController implements Initializable {
             public void handle(WorkerStateEvent event) {
                 System.out.println("SERVER: DONE!");
                 actionQRCanvas.clear();
-                showQRCode.setDisable(false);
                 selectKeyButton.setDisable(false);
                 cancelQR.setVisible(false);
             }
@@ -95,7 +92,6 @@ public class ExportTabController implements Initializable {
             @Override
             public void handle(WorkerStateEvent event) {
                 actionQRCanvas.clear();
-                showQRCode.setDisable(false);
                 selectKeyButton.setDisable(false);
                 cancelQR.setVisible(false);
             }
@@ -108,6 +104,7 @@ public class ExportTabController implements Initializable {
         if (serverThread.isRunning()) {
             //close server socket
             serverThread.cancel();
+            keyLabel.setText("No key selected");
         }
     }
 

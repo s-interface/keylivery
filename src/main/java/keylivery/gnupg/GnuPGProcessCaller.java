@@ -152,7 +152,10 @@ public class GnuPGProcessCaller implements GnuPG {
         int waitFor() {
             try {
                 if (gpgProcess != null) {
-                    return gpgProcess.waitFor();
+                    int result = gpgProcess.waitFor();
+                    inReader.join();
+                    errReader.join();
+                    return result;
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
